@@ -1,0 +1,50 @@
+@page "/UndoRedo"
+@using UndoRedoCommands.Data
+@using UndoRedoCommands.Commands
+<h3>UndoRedo</h3>
+<p>Number = @_model?.Number</p>
+<p>Text = @_model?.Text</p>
+<p>IsTrue = @_model?.IsTrue</p>
+
+<EditForm Model="_paramModel">
+    <InputNumber DisplayName="Number" @bind-Value="_paramModel!.Number"></InputNumber>
+    <InputText DisplayName="Text" @bind-Value="_paramModel!.Text"></InputText>
+    <InputCheckbox DisplayName="IsTrue" @bind-Value="_paramModel!.IsTrue"></InputCheckbox>
+</EditForm>
+
+<button @onclick="ExecuteOnClick">Execute</button>
+<button @onclick="UndoOnClick" disabled="@(!StateManager.CanUndo)">Undo</button>
+<button @onclick="RedoOnClick" disabled="@(!StateManager.CanRedo)">Redo</button>
+
+@code {
+    [Inject]
+#pragma warning disable CS8618 injected - n.stich
+        public ICommandStateManager StateManager { get; set; }
+#pragma warning restore CS8618
+    
+    protected override void OnParametersSet()
+    {
+        _model = new UselessModel();
+        _paramModel = new UselessModel();
+    }
+
+    private UselessModel? _model;
+    private UselessModel? _paramModel;
+
+    private void ExecuteOnClick()
+    {
+        if (_paramModel is null || _model is null) throw new Exception();
+        var command = new UpdateModelCommand(_paramModel, _model);
+        StateManager.Execute(command);
+    }
+
+    private void UndoOnClick()
+    {
+        StateManager.Undo();
+    }
+
+    private void RedoOnClick()
+    {
+        StateManager.Redo();
+    }
+}
