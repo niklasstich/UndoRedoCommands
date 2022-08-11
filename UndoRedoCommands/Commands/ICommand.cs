@@ -2,8 +2,7 @@ using System.ComponentModel;
 
 namespace UndoRedoCommands.Commands;
 
-public interface ICommand : INotifyPropertyChanged
+public interface ICommand
 {
     public void Execute();
-    public bool CanExecute { get; }
 }

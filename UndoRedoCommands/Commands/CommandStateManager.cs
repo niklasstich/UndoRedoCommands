@@ -3,10 +3,10 @@ using System.Runtime.CompilerServices;
 
 namespace UndoRedoCommands.Commands;
 
-public class CommandStateManager : ICommandStateManager
+public sealed class CommandStateManager : ICommandStateManager
 {
-    private Stack<IUndoCommand> _undo;
-    private Stack<IUndoCommand> _redo;
+    private readonly Stack<IUndoCommand> _undo;
+    private readonly Stack<IUndoCommand> _redo;
 
     public CommandStateManager()
     {
@@ -28,31 +28,67 @@ public class CommandStateManager : ICommandStateManager
     public void Undo()
     {
         if (!CanUndo) return;
-        var command = _undo.Pop();
+        var command = PopUndo();
         command.Undo();
-        _redo.Push(command);
+        PushRedo(command);
     }
 
     public void Redo()
     {
         if (!CanRedo) return;
-        var command = _redo.Pop();
+        var command = PopRedo();
         command.Redo();
+        PushUndo(command);
+    }
+
+    private IUndoCommand PopUndo()
+    {
+        var canUndoBefore = CanUndo;
+        var command = _undo.Pop();
+        if (canUndoBefore != CanUndo)
+        {
+            OnPropertyChanged(nameof(CanUndo));
+        }
+
+        return command;
+    }
+    
+    private IUndoCommand PopRedo()
+    {
+        var canRedoBefore = CanRedo;
+        var command = _redo.Pop();
+        if (canRedoBefore != CanRedo)
+        {
+            OnPropertyChanged(nameof(CanRedo));
+        }
+
+        return command;
+    }
+    
+    private void PushUndo(IUndoCommand command)
+    {
+        var canUndoBefore = CanUndo;
         _undo.Push(command);
+        if (canUndoBefore != CanUndo)
+        {
+            OnPropertyChanged(nameof(CanUndo));
+        }
+    }
+
+    private void PushRedo(IUndoCommand command)
+    {
+        var canRedoBefore = CanRedo;
+        _redo.Push(command);
+        if (canRedoBefore != CanRedo)
+        {
+            OnPropertyChanged(nameof(CanRedo));
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

@@ -1,19 +1,17 @@
+using System.ComponentModel;
 using UndoRedoCommands.Data;
 
 namespace UndoRedoCommands.Commands;
 
-public sealed class UpdateModelCommand : UndoCommandBase
+public class UpdateModelCommand : IUndoCommand
 {
     private UselessModel _param;
-    private UselessModel _model;
+    private readonly UselessModel _model;
 
     public UpdateModelCommand(UselessModel param, UselessModel model)
     {
         _param = param;
         _model = model;
-        CanExecute = true;
-        CanRedo = false;
-        CanUndo = false;
     }
 
     private void ExecuteInner()
@@ -27,27 +25,9 @@ public sealed class UpdateModelCommand : UndoCommandBase
         _param = newParam;
     }
 
-    public override void Execute()
-    {
-        ExecuteInner();
-        CanExecute = false;
-        CanRedo = false;
-        CanUndo = true;
-    }
+    public void Execute() => ExecuteInner();
 
-    public override void Undo()
-    {
-        ExecuteInner();
-        CanExecute = false;
-        CanRedo = true;
-        CanUndo = false;
-    }
+    public void Undo() => ExecuteInner();
 
-    public override void Redo()
-    {
-        ExecuteInner();
-        CanExecute = false;
-        CanRedo = false;
-        CanUndo = true;
-    }
+    public void Redo() => ExecuteInner();
 }
