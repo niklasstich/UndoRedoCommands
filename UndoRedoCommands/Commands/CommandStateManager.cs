@@ -23,6 +23,7 @@ public sealed class CommandStateManager : ICommandStateManager
         {
             _undo.Push(undoCommand);
         }
+        _redo.Clear();
     }
 
     public void Undo()
