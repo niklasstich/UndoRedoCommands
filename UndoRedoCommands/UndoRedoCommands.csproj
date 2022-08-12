@@ -6,4 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="PostSharp.Patterns.Model" Version="6.10.14" />
+    </ItemGroup>
+
 </Project>

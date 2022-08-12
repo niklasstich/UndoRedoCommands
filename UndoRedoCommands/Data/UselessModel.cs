@@ -1,5 +1,8 @@
+using PostSharp.Patterns.Recording;
+
 namespace UndoRedoCommands.Data;
 
+[Recordable]
 public class UselessModel : IOriginator
 {
     public UselessModel()

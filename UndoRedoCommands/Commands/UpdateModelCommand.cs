@@ -1,3 +1,4 @@
+using PostSharp.Patterns.Recording;
 using UndoRedoCommands.Data;
 
 namespace UndoRedoCommands.Commands;
@@ -17,7 +18,7 @@ public class UpdateModelCommand : IUndoCommand
     public void Execute()
     {
         _memento = _model.GetMemento();
-        
+        using var scope = RecordingServices.DefaultRecorder.OpenScope("Update model");
         _model.Number = _param.Number;
         _model.Text = _param.Text;
         _model.IsTrue = _param.IsTrue;
@@ -25,12 +26,12 @@ public class UpdateModelCommand : IUndoCommand
 
     public void Undo()
     {
-        if (_memento == null)
-        {
-            throw new InvalidOperationException("_memento is null");
-        }
-        _model.RestoreMemento(_memento);
+        var operations = RecordingServices.DefaultRecorder.UndoOperations;
+        RecordingServices.DefaultRecorder.Undo();
     }
 
-    public void Redo() => Execute();
+    public void Redo()
+    {
+        RecordingServices.DefaultRecorder.Redo();
+    }
 }
