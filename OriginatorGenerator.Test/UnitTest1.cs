@@ -14,7 +14,7 @@ using OriginatorGenerator;
 
 namespace OriginatorGeneratorConsumer;
 
-[Test123]
+[Memento]
 public partial class Foobarbaz
 {
     public string Name {get;set;}

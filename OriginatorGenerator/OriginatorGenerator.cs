@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,11 +17,13 @@ namespace OriginatorGenerator
         {
             context.RegisterPostInitializationOutput(ctx =>
             {
-                ctx.AddSource("Test123Attribute.g.cs",
-                    SourceText.From(Test123Helper.AttributeCode, Encoding.UTF8));
-                ctx.AddSource("IOriginator.g.cs",
+                ctx.AddSource($"{MementoAttributeHelper.AttributeName}.g.cs",
+                    SourceText.From(MementoAttributeHelper.AttributeCode, Encoding.UTF8));
+                ctx.AddSource($"{MementoExcludeAttributeHelper.AttributeName}.g.cs",
+                    SourceText.From(MementoExcludeAttributeHelper.AttributeCode, Encoding.UTF8));
+                ctx.AddSource($"{IOriginatorHelper.InterfaceName}.g.cs",
                     SourceText.From(IOriginatorHelper.InterfaceCode, Encoding.UTF8));
-                ctx.AddSource("IMemento.g.cs",
+                ctx.AddSource($"{IMementoHelper.InterfaceName}.g.cs",
                     SourceText.From(IMementoHelper.InterfaceCode, Encoding.UTF8));
             });
             
@@ -51,70 +52,8 @@ namespace OriginatorGenerator
                     continue;
                 }
 
-                BuildIMementoImplementation(compilation, context, classDeclaration);
+                BuildIOriginatorImplementation(compilation, context, classDeclaration);
             }
-        }
-
-        private static void BuildIMementoImplementation(Compilation compilation, SourceProductionContext context,
-            ClassDeclarationSyntax classDeclaration)
-        {
-            var sb = new StringBuilder();
-            var identifierText = classDeclaration.Identifier.Text;
-            var nameSpace = GetNamespace(classDeclaration);
-            var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
-            if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } typeSymbol)
-                throw new Exception("type wasn't INamedTypeSymbol");
-            var members = typeSymbol.GetMembers();
-            var properties = members.OfType<IPropertySymbol>();
-            var fields = members.OfType<IFieldSymbol>();
-            sb.AppendLine($"using {IOriginatorHelper.InterfaceNamespace};");
-            sb.AppendLine();
-            sb.AppendLine($"namespace {nameSpace};");
-            sb.AppendLine();
-            sb.AppendLine($@"public partial class {identifierText} : {IOriginatorHelper.InterfaceName}
-{{
-    public IMemento CreateMemento()
-    {{
-        return new ConcreteMemento(this);
-    }}
-
-    public void RestoreMemento(IMemento memento)
-    {{
-        //restore from memento here
-        throw new NotImplementedException();
-    }}
-");
-            sb.AppendLine(@$"
-    private class ConcreteMemento : {IMementoHelper.InterfaceName}
-    {{
-        public ConcreteMemento({identifierText} originator) {{
-            //constructor here
-        }}");
-            foreach (var property in properties)
-            {
-                if (property.SetMethod is not null)
-                {
-                    if (!property.SetMethod.IsImplicitlyDeclared)
-                    {
-                        
-                    }
-                    sb.AppendLine($"        public {property.Type.ToDisplayString()} {property.Name} {{ get; set; }}");
-                }
-                break;
-            }
-
-            foreach (var field in fields)
-            {
-                if(!field.IsImplicitlyDeclared)
-                    sb.AppendLine($"        public {field.Type.ToDisplayString()} {field.Name};");
-                break;
-            }
-
-            sb.Append(@"
-    }
-}");
-            
-            context.AddSource($"{identifierText}.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
         }
 
         private static bool IsTargetForGeneration(SyntaxNode node, CancellationToken _) =>
@@ -132,16 +71,67 @@ namespace OriginatorGenerator
                     var attributeSymbol = ModelExtensions.GetSymbolInfo(context.SemanticModel, attributeSyntax, cancellationToken);
                     var attributeContainingTypeSymbol = attributeSymbol.Symbol?.ContainingType;
                     var fullName = attributeContainingTypeSymbol?.ToDisplayString();
-                    Debugger.Launch();
-                    if (fullName != Test123Helper.AttributeFullName) continue; 
+                    if (fullName != MementoAttributeHelper.AttributeFullName) continue; 
                     return classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword) ? classDeclarationSyntax : null;
                 }
             }
 
             return null;
         }
-        
-        private static string GetNamespace(BaseTypeDeclarationSyntax syntax)
+
+        private static void BuildIOriginatorImplementation(Compilation compilation, SourceProductionContext context,
+            ClassDeclarationSyntax classDeclaration)
+        {
+            var className = classDeclaration.Identifier.Text;
+            var childClassName = className + "Memento";
+            var nameSpace = GetContainingNamespace(classDeclaration);
+            
+            var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
+            if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } typeSymbol)
+                throw new Exception("type wasn't INamedTypeSymbol");
+            
+            //filter members
+            var relevantMembers = typeSymbol.GetMembers().Where(symbol =>
+            {
+                if (symbol is not (IPropertySymbol or IFieldSymbol)) return false;
+                if (symbol.IsImplicitlyDeclared) return false;
+                
+                var attributes = symbol.GetAttributes();
+                if (attributes.IsEmpty) return true;
+                return !attributes.Any(attribute =>
+                    attribute.AttributeClass?.ToDisplayString() == MementoExcludeAttributeHelper.AttributeFullName);
+            }).ToImmutableList();
+
+            var propertiesImpl =
+                string.Join(Environment.NewLine,
+                    relevantMembers
+                        .OfType<IPropertySymbol>()
+                        .Select(TemplatingHelper.GeneratePropertyString)
+                    );
+
+            var fieldsImpl =
+                string.Join(Environment.NewLine,
+                    relevantMembers
+                        .OfType<IFieldSymbol>()
+                        .Select(TemplatingHelper.GenerateFieldString)
+                    );
+
+            var constructorImpl =
+                string.Join(Environment.NewLine, relevantMembers.Select(TemplatingHelper.GenerateConstructorMemberSet));
+
+            var restoreImpl =
+                string.Join(Environment.NewLine, relevantMembers.Select(TemplatingHelper.GenerateRestoreMemberGet));
+
+            var mementoImpl = TemplatingHelper.GetMementoClassTemplate(className, childClassName, constructorImpl,
+                propertiesImpl, fieldsImpl);
+            var classImpl =
+                TemplatingHelper.GetOriginatorClassTemplate(nameSpace, className, childClassName, restoreImpl, mementoImpl);
+            
+            context.AddSource($"{className}.g.cs", classImpl);
+        }
+
+
+        private static string GetContainingNamespace(BaseTypeDeclarationSyntax syntax)
         {
             //iterate through parents until we run find namespace syntax element
             var potentialNamespaceParent = syntax.Parent;

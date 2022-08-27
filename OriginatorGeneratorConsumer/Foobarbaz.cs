@@ -2,16 +2,17 @@ using OriginatorGenerator;
 
 namespace OriginatorGeneratorConsumer;
 
-[Test123]
+[Memento]
 public partial class Foobarbaz
 {
     public string Name { get; set; }
     
 }
 
-[Test123]
+[Memento]
 public partial class Foo
 {
+    [MementoExclude]
     private string _name;
 
     public string Name
@@ -21,7 +22,7 @@ public partial class Foo
     }
 }
 
-[Test123]
+[Memento]
 public partial class Baz
 {
     private int Number { get; set; }
