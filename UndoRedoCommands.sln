@@ -2,6 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndoRedoCommands", "UndoRedoCommands\UndoRedoCommands.csproj", "{2C8B4B0F-FF6F-4A6A-8788-AFEEA306C497}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OriginatorGenerator", "OriginatorGenerator\OriginatorGenerator.csproj", "{23C286D4-1AD4-4A1C-AEEA-780F390EDC73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OriginatorGeneratorConsumer", "OriginatorGeneratorConsumer\OriginatorGeneratorConsumer.csproj", "{C67A98A7-5D48-4B62-8895-9FD1DFDDEB7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OriginatorGenerator.Test", "OriginatorGenerator.Test\OriginatorGenerator.Test.csproj", "{F5D1000C-C6B7-4BD7-90B3-AB3BDB5286F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -10,5 +16,17 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2C8B4B0F-FF6F-4A6A-8788-AFEEA306C497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2C8B4B0F-FF6F-4A6A-8788-AFEEA306C497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23C286D4-1AD4-4A1C-AEEA-780F390EDC73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23C286D4-1AD4-4A1C-AEEA-780F390EDC73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23C286D4-1AD4-4A1C-AEEA-780F390EDC73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23C286D4-1AD4-4A1C-AEEA-780F390EDC73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C67A98A7-5D48-4B62-8895-9FD1DFDDEB7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C67A98A7-5D48-4B62-8895-9FD1DFDDEB7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C67A98A7-5D48-4B62-8895-9FD1DFDDEB7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C67A98A7-5D48-4B62-8895-9FD1DFDDEB7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5D1000C-C6B7-4BD7-90B3-AB3BDB5286F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5D1000C-C6B7-4BD7-90B3-AB3BDB5286F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5D1000C-C6B7-4BD7-90B3-AB3BDB5286F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5D1000C-C6B7-4BD7-90B3-AB3BDB5286F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

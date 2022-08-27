@@ -9,7 +9,7 @@ public class UselessModel : IOriginator
         Text = "";
     }
     public int Number { get; set; }
-    public bool IsTrue { get; set; }
+    private bool IsTrue { get; set; }
     public string Text { get; set; }
     public IMemento GetMemento()
     {
@@ -39,6 +39,7 @@ public class UselessModel : IOriginator
         internal int Number { get; }
         internal bool IsTrue { get; }
         internal string Text { get; }
+        internal List<string> Texts { get; }
     }
 
 }

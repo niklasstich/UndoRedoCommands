@@ -4,12 +4,10 @@
 <h3>UndoRedo</h3>
 <p>Number = @_model?.Number</p>
 <p>Text = @_model?.Text</p>
-<p>IsTrue = @_model?.IsTrue</p>
 
 <EditForm Model="_paramModel">
     <InputNumber DisplayName="Number" @bind-Value="_paramModel!.Number"></InputNumber>
     <InputText DisplayName="Text" @bind-Value="_paramModel!.Text"></InputText>
-    <InputCheckbox DisplayName="IsTrue" @bind-Value="_paramModel!.IsTrue"></InputCheckbox>
 </EditForm>
 
 <button @onclick="ExecuteOnClick">Execute</button>

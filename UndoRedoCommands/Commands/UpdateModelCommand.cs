@@ -20,7 +20,6 @@ public class UpdateModelCommand : IUndoCommand
         
         _model.Number = _param.Number;
         _model.Text = _param.Text;
-        _model.IsTrue = _param.IsTrue;
     }
 
     public void Undo()
