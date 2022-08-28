@@ -9,8 +9,7 @@ public static class TemplatingHelper
     public static string TripleIndent => DoubleIndent + Indent;
     
     public static string GetOriginatorClassTemplate(string nameSpace, string parentClassName, string mementoClassName, string restoreImpl, string innerClass) =>
-$@"
-namespace {nameSpace};
+$@"namespace {nameSpace};
 
 using OriginatorGenerator;
 
@@ -35,11 +34,10 @@ public partial class {parentClassName} : {IOriginatorHelper.InterfaceName}
         string constructorImpl, string propertiesImpl, string fieldsImpl)
     {
         if (!string.IsNullOrWhiteSpace(propertiesImpl))
-            propertiesImpl = $"{Indent}//Properties{propertiesImpl}";
+            propertiesImpl = $"{DoubleIndent}//Properties\n{propertiesImpl}";
         if (!string.IsNullOrWhiteSpace(fieldsImpl))
-            fieldsImpl = $"{Indent}//Fields{propertiesImpl}";
-        return $@"
-    private class {mementoClassName} : {IMementoHelper.InterfaceName} 
+            fieldsImpl = $"{DoubleIndent}//Fields\n{propertiesImpl}";
+        return $@"{Indent}private class {mementoClassName} : {IMementoHelper.InterfaceName} 
     {{
         public {mementoClassName}({parentClassName} originator)
         {{
